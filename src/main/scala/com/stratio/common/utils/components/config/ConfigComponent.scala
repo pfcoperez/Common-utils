@@ -15,6 +15,8 @@
  */
 package com.stratio.common.utils.components.config
 
+import scala.util.{Success, Try}
+
 trait ConfigComponent {
 
   val config: Config
@@ -22,29 +24,29 @@ trait ConfigComponent {
   trait
   Config {
 
-    def getConfig(key: String): Option[Config]
+    def getConfig(key: String): Try[Option[Config]]
 
-    def getConfigPath(key: String): Option[Config] = None
+    def getConfigPath(key: String): Try[Option[Config]] = Success(None)
 
-    def getString(key: String): Option[String]
+    def getString(key: String): Try[Option[String]]
 
-    def getString(key: String, default: String): String =
-      getString(key) getOrElse default
+    def getString(key: String, default: String): Try[String] = ??? //TODO
+      //getString(key) getOrElse default //Use here monad transformers
 
-    def getInt(key: String): Option[Int]
+    def getInt(key: String): Try[Option[Int]]
 
-    def getInt(key: String, default: Int): Int =
-      getInt(key) getOrElse default
+    def getInt(key: String, default: Int): Try[Int] = ??? //TODO
+      //getInt(key) getOrElse default //Monad transformers here please
 
-    def getStringList(key: String): List[String]
+    def getStringList(key: String): Try[List[String]]
 
-    def getStringList(key: String, default: List[String]): List[String] = {
+    def getStringList(key: String, default: List[String]): Try[List[String]] = ??? /* TODO: {
       val list = getStringList(key)
       if (list.isEmpty) default else list
-    }
+    }*/
 
-    def toMap: Map[String, Any]
+    def toMap: Try[Map[String, Any]]
 
-    def toStringMap: Map[String, String]
+    def toStringMap: Try[Map[String, String]]
   }
 }
