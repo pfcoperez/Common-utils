@@ -24,7 +24,7 @@ import org.scalatest.{FlatSpecLike, Matchers}
 import scala.concurrent.duration._
 
 
-class TestKeepAlive extends TestKit(ActorSystem("KeepAliveSpec"))
+class KeepAliveTest extends TestKit(ActorSystem("KeepAliveSpec"))
   with FlatSpecLike with Matchers {
 
   class MonitoredActor(override val keepAliveId: Int, override val master: ActorRef) extends LiveMan[Int] {
