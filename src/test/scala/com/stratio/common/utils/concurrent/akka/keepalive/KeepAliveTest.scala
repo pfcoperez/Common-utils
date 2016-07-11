@@ -19,11 +19,14 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit.TestKit
 import com.stratio.common.utils.concurrent.akka.keepalive.KeepAliveMaster.{DoCheck, HeartbeatLost}
 import com.stratio.common.utils.concurrent.akka.keepalive.LiveMan.HeartBeat
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FlatSpecLike, Matchers}
 
 import scala.concurrent.duration._
 
 
+@RunWith(classOf[JUnitRunner])
 class KeepAliveTest extends TestKit(ActorSystem("KeepAliveSpec"))
   with FlatSpecLike with Matchers {
 
