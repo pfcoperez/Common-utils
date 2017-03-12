@@ -45,28 +45,35 @@ trait ZookeeperRepositoryWithTransactionsComponent extends ZookeeperRepositoryCo
       private val path2lock: Map[String, InterProcessMutex] = Map.empty
 
       def acquireResources(paths: Seq[String]): Unit = {
-        acquisitionLock.acquire()
         path2lock.synchronized {
-          paths foreach { path =>
-            val lock = path2lock.get(path) getOrElse {
-              val newLock = new InterProcessMutex(curatorClient, path)
-              path2lock += (path -> newLock)
-              newLock
+          val gotIt = paths forall { path =>
+            path2lock.get(path).map(_.isAcquiredInThisProcess).getOrElse(false)
+          }
+          if(!gotIt) {
+            acquisitionLock.acquire()
+            paths foreach { path =>
+              val lock = path2lock.get(path) getOrElse {
+                val newLock = new InterProcessMutex(curatorClient, path)
+                path2lock += (path -> newLock)
+                newLock
+              }
+              lock.acquire()
             }
-            lock.acquire()
+            acquisitionLock.release()
           }
         }
-        acquisitionLock.release()
       }
 
-      def freeResources(paths: Seq[String]): Unit = path2lock.synchronized {
-        for {
-          path <- paths
-          lock <- path2lock.get(path)
-        } {
-          lock.release()
-          if(!lock.isAcquiredInThisProcess)
-            path2lock -= path
+      def freeResources(paths: Seq[String]): Unit = {
+        path2lock.synchronized {
+          for {
+            path <- paths
+            lock <- path2lock.get(path)
+          } {
+            lock.release()
+            if(!lock.isAcquiredInThisProcess)
+              path2lock -= path
+          }
         }
       }
 
