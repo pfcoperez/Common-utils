@@ -46,6 +46,29 @@ trait TransactionManagerComponent[K,V] {
       * @return Exclusion area result after its executions
       */
     final def atomically[T](entity: String)(block: => T): T = atomically[T](entity, WholeRepository)(block)
+
+    final def atomically[T](entity: String, resources: TransactionResource*)(block: => T): T = {
+      def nestedAtomically(resources: Seq[TransactionResource]): T =
+        if(resources.isEmpty) block
+        else atomically(entity, resources.head) {
+          nestedAtomically(resources.tail)
+        }
+      // Ordering the lock sequence will highly reduce deadlocks probability.
+      nestedAtomically(resources.sortBy(_.id))
+    }
+
+    final def atomically[T](
+                             entity: String,
+                             pathResource: PathResource,
+                             recursiveLock: Boolean = false
+                           )(block: => T): T = {
+      import pathResource.path
+      val subPaths = ((if(recursiveLock) 1 else path.size) to path.size) map {
+        n => PathResource(path take n)
+      }
+      atomically(entity, subPaths:_*)(block)
+    }
+
   }
 
 }

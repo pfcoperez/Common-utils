@@ -27,3 +27,11 @@ object TransactionResource {
   }
 
 }
+
+case class PathResource(
+                    path: Seq[String],
+                    val separator: String = "/") extends TransactionResource {
+  require(!path.exists(_ contains separator))
+
+  override def id: String = path.mkString(separator, separator, "")
+}
